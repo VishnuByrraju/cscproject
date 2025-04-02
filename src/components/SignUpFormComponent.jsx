@@ -1,175 +1,172 @@
-/* eslint-disable react/prop-types */
-import { useState } from 'react';
-import InputBox from "../components/InputBox";
-import BigButton from "../components/BigButton";
-import LoadingScreenLarge from '../components/LodingScreenLarge';
-import PopupComponent from './PopupComponent';
-import BottomToast from './BottomToast';
 
-function SignUpFormComponent({ isStudent, BASE_URL }) {
-    
-    const [signUpResponseData, setSignUpResponseData] = useState(null);
-    const [signUpErrorData, setSignUpErrorData] = useState(null);
-    const [isFirstNameEmpty, setIsFirstNameEmpty] = useState(false);
-    const [isLastNameEmpty, setIsLastNameEmpty] = useState(false);
-    const [isEmailEmpty, setIsEmailEmpty] = useState(false);
-    const [isPasswordEmpty, setIsPasswordEmpty] = useState(false);
-    const [passwordError, setPasswordError] = useState(null);
-    const [isLoading, setIsLoading] = useState(null);
-    const [isCategoryEmpty, setIsCategoryEmpty] = useState(false);
-    const [isPrivacyPolicyUnchecked, setIsPrivacyPolicyUnchecked] = useState(false);
+import { useState, useRef, useEffect } from "react"
+import BottomToast from "./BottomToast"
+import BigButtonWrapper from "./BigButton"
 
-    const postData = async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
+function OtpVerificationPopup({ email, onVerificationSuccess, onClose, BASE_URL }) {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""])
+  const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const inputRefs = useRef([])
 
-        const first_name = document.getElementById('first_name').value;
-        const last_name = document.getElementById('last_name').value;
-        const email_id = document.getElementById('email_id').value;
-        const password = document.getElementById('password').value;
-        const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?`~]).{8,}$/;
-        const category = document.getElementById('category').value;
-        const privacyPolicy = document.getElementById('privacy_policy').checked;
+  // Focus the first input when component mounts
+  useEffect(() => {
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus()
+    }
+  }, [])
 
-        // Check if any input is empty
-        setIsFirstNameEmpty(first_name === '');
-        setIsLastNameEmpty(last_name === '');
-        setIsEmailEmpty(email_id === '');
-        setIsPasswordEmpty(password === '');
-        setIsPrivacyPolicyUnchecked(!privacyPolicy);
-        
-        if (first_name === '' || last_name === '' || email_id === '' || password === '' || !privacyPolicy) {
-            return; // Exit early if any input is empty
-        }
+  const handleChange = (index, value) => {
+    // Only allow numbers
+    if (!/^\d*$/.test(value)) return
 
-        // Validate password
-        if (!passwordPattern.test(password)) {
-            if (password.length < 8) {
-                setPasswordError('Password must be at least 8 characters long.');
-            } else if (!/[A-Z]/.test(password)) {
-                setPasswordError('Password must contain at least one uppercase letter.');
-            } else if (!/\d/.test(password)) {
-                setPasswordError('Password must contain at least one digit.');
-            } else if (!/[!@#$%^&*()_+[\]{};':"\\|,.<>/?`~]/.test(password)) {
-                setPasswordError('Password must contain at least one special character.');
-            }
-            return;
-        } else {
-            setPasswordError(null);
-        }
+    const newOtp = [...otp]
+    newOtp[index] = value
+    setOtp(newOtp)
 
-        try {
-            setIsLoading(1); // show the loading screen 
-            
-            const response = await fetch(`${BASE_URL}/v1/signup`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    first_name,
-                    last_name,
-                    email: email_id,
-                    password,
-                    role: isStudent,
-                    category : document.getElementById('category').value
-                })
-            });
+    // Auto-focus to next input
+    if (value && index < 5 && inputRefs.current[index + 1]) {
+      inputRefs.current[index + 1].focus()
+    }
+  }
 
-            setIsLoading(0); // remove the signup loading screen
+  const handleKeyDown = (index, e) => {
+    // Move to previous input on backspace if current input is empty
+    if (e.key === "Backspace" && !otp[index] && index > 0 && inputRefs.current[index - 1]) {
+      inputRefs.current[index - 1].focus()
+    }
+  }
 
-            const content = await response.json();
+  const handlePaste = (e) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData("text")
 
-            if (response.ok) {
-                console.log("data", content);
-                setSignUpResponseData(content.data.msg);
-            } else {
-                setSignUpErrorData(content.detail || 'Signup failed');
-            }
-        } catch (error) {
-            setIsLoading(0); // remove the signup loading screen
-            setSignUpErrorData('Network error: ' + error.message);
-        }
-    };
+    // Check if pasted content is a 6-digit number
+    if (/^\d{6}$/.test(pastedData)) {
+      const digits = pastedData.split("")
+      setOtp(digits)
 
-    return (
-        <form className="w-full max-w-lg mx-auto " onSubmit={postData}>
-            <div className="text-2xl text-gray-800 text-left ">
-                <span className='text-3xl font-bold text-second'>Sign Up</span> as
-                <span className="text-primary">
-                    {isStudent ? " Student" : " Teacher"}
-                </span>
-            </div>
+      // Focus the last input
+      if (inputRefs.current[5]) {
+        inputRefs.current[5].focus()
+      }
+    }
+  }
 
-            <div id="input" className="flex flex-col w-full my-5 space-y-4">
-                <InputBox
-                    type="text"
-                    label="First Name"
-                    id="first_name"
-                    placeholder="Enter First Name"
-                    isEmpty={isFirstNameEmpty}
-                />
+  const verifyOtp = async () => {
+    console.log("Verifying OTP...")
+    const otpValue = otp.join("")
 
-                <InputBox
-                    type="text"
-                    label="Last Name"
-                    id="last_name"
-                    placeholder="Enter Last Name"
-                    isEmpty={isLastNameEmpty}
-                />
+    if (otpValue.length !== 6) {
+      setError("Please enter a valid 6-digit OTP")
+      return
+    }
 
-                <InputBox
-                    type="email"
-                    label="Email ID"
-                    id="email_id"
-                    placeholder="Enter your Email ID (eg. liny@xyz.com)"
-                    isEmpty={isEmailEmpty}
-                />
+    setIsLoading(true)
 
-                <InputBox
-                    type="password"
-                    label="Password"
-                    id="password"
-                    placeholder="Enter your password"
-                    isEmpty={isPasswordEmpty}
-                />
+    try {
+      const response = await fetch(`https://55cr1n59r3.execute-api.us-east-2.amazonaws.com/dev/v1/auth/verify-otp`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "body": {
+          email,
+          otp: otpValue,
+          }
+        }),
+      })
 
-                {passwordError && <div className='text-1xl text-red-500'>{passwordError}</div>}
+      const data = await response.json()
 
-                <InputBox
-                    type="category"
-                    label="School/Company Name"
-                    id="category"
-                    placeholder="Enter Your School/Company Name"
-                    isEmpty={isCategoryEmpty}
-                />
+      if (response.ok) {
+        onVerificationSuccess()
+      } else {
+        setError(data.detail || "OTP verification failed")
+      }
+    } catch (error) {
+      setError("Network error. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-                <div className="mt-4 flex items-start">
-                    <div className="flex items-center h-5">
-                        <input
-                            id="privacy_policy"
-                            name="privacy_policy"
-                            type="checkbox"
-                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="ml-2 text-sm">
-                        <label htmlFor="privacy_policy" className="font-medium text-gray-700">
-                                Accetto i Termini e Condizioni e Politica sulla Privacy
-                                <a className='text-blue-600 underline' href="https://skill-bridge.uk/parliamo-privacy-policy-italiano/"> Privacy & Policy</a>
-                        </label>
-                    </div>
-                </div>
-                {isPrivacyPolicyUnchecked && <div className="text-red-500 text-sm">Please agree to the privacy policy</div>}
+  const resendOtp = async () => {
+    setIsLoading(true)
 
-                {signUpResponseData && <PopupComponent content={signUpResponseData + "Check Your Spam Folder Also."} contentType={"Sign Up Status"} redirectPath={"/"} />}
-                {signUpErrorData ? <BottomToast text={signUpErrorData} textState={setSignUpErrorData} color='grey' /> : null}
-            </div>
-                        
-            <BigButton type="submit" placeholder="SIGN UP" />
-            {isLoading ? <LoadingScreenLarge /> : null }
-        </form>
-    );
+    try {
+      const response = await fetch(`${BASE_URL}/v1/resend-otp`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setError("OTP has been resent to your email")
+        setTimeout(() => setError(null), 3000)
+      } else {
+        setError(data.detail || "Failed to resend OTP")
+      }
+    } catch (error) {
+      setError("Network error. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="bg-white rounded-lg p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Verify Your Email</h2>
+        <p className="text-gray-600 mb-6">
+          We've sent a verification code to {email}. Please enter the 6-digit code below.
+        </p>
+
+        <div className="flex justify-between mb-6">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => (inputRefs.current[index] = el)}
+              type="text"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={index === 0 ? handlePaste : undefined}
+              className="w-12 h-12 text-center text-xl font-bold border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          ))}
+        </div>
+
+        <div className="mt-4 text-center">
+          <button onClick={verifyOtp} disabled={isLoading} className="text-primary hover:underline focus:outline-none">
+            Verify OTP
+          </button>
+        </div>
+
+        <div className="mt-4 text-center">
+          <button onClick={resendOtp} disabled={isLoading} className="text-primary hover:underline focus:outline-none">
+            Resend OTP
+          </button>
+        </div>
+
+        {error && <BottomToast text={error} textState={setError} color="grey" />}
+      </div>
+    </div>
+  )
 }
 
-export default SignUpFormComponent;
+export default OtpVerificationPopup
+
