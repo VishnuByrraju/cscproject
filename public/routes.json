@@ -1,0 +1,33 @@
+{
+    "routes": [],
+    "navigationFallback": {
+      "rewrite": "/index.html",
+      "exclude": ["/images/*", "/css/*"]
+    },
+    "responseOverrides": {
+      "401": {
+        "redirect": "/login",
+        "statusCode": 302
+      },
+      
+      "404": {
+        "rewrite": "/index.html"
+      }
+    },
+    "globalHeaders": {
+      "/*": {
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
+      }
+    },
+    "mimeTypes": {
+      ".json": "text/json"
+    },
+    "redirects": [
+      {
+        "source": "https://www.parliamo.skill-bridge.uk/*",
+        "destination": "https://parliamo.skill-bridge.uk",
+        "statusCode": 301
+      }
+    ]
+  }
+  

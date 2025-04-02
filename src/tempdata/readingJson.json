@@ -1,0 +1,169 @@
+{
+  "data": {
+    "msg": "Question Submitted Successfully",
+    "result": {
+      "mispronunciations": [
+        "20",
+        "32"
+      ],
+      "omissions": [
+        "15",
+        "33"
+      ],
+      "insertions": [
+        "12"
+      ],
+      "totalPhrase": [
+        {
+          "0": "Loding..........."
+        },
+        {
+          "1": "was"
+        },
+        {
+          "2": "a"
+        },
+        {
+          "3": "beautiful"
+        },
+        {
+          "4": "day"
+        },
+        {
+          "5": "we"
+        },
+        {
+          "6": "had"
+        },
+        {
+          "7": "a"
+        },
+        {
+          "8": "great"
+        },
+        {
+          "9": "time"
+        },
+        {
+          "10": "taking"
+        },
+        {
+          "11": "a"
+        },
+        {
+          "12": "long"
+        },
+        {
+          "13": "long"
+        },
+        {
+          "14": "walk"
+        },
+        {
+          "15": "outside"
+        },
+        {
+          "16": "in"
+        },
+        {
+          "17": "the"
+        },
+        {
+          "18": "morning"
+        },
+        {
+          "19": "the"
+        },
+        {
+          "20": "countryside"
+        },
+        {
+          "21": "was"
+        },
+        {
+          "22": "in"
+        },
+        {
+          "23": "full"
+        },
+        {
+          "24": "bloom"
+        },
+        {
+          "25": "yet"
+        },
+        {
+          "26": "the"
+        },
+        {
+          "27": "air"
+        },
+        {
+          "28": "was"
+        },
+        {
+          "29": "crisp"
+        },
+        {
+          "30": "and"
+        },
+        {
+          "31": "cold"
+        },
+        {
+          "32": "towards"
+        },
+        {
+          "33": "the"
+        },
+        {
+          "34": "end"
+        },
+        {
+          "35": "of"
+        },
+        {
+          "36": "the"
+        },
+        {
+          "37": "day"
+        },
+        {
+          "38": "clouds"
+        },
+        {
+          "39": "came"
+        },
+        {
+          "40": "in"
+        },
+        {
+          "41": "forecasting"
+        },
+        {
+          "42": "much"
+        },
+        {
+          "43": "needed"
+        },
+        {
+          "44": "rain"
+        }
+      ],
+      "pronunciationAssessment": [
+        {
+          "AccuracyScore": 92
+        },
+        {
+          "FluencyScore": 81
+        },
+        {
+          "CompletenessScore": 91
+        },
+        {
+          "PronScore": 85.2
+        }
+      ]
+    }
+  }
+}
