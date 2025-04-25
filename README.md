@@ -1,4 +1,3 @@
-Here’s a polished and professional `README.md` for your GitHub repository `VishnuByrraju/cscproject`, tailored specifically for the **AI-Powered Pronunciation Assessment System** frontend:
 
 ---
 
